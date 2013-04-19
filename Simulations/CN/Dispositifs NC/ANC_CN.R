@@ -20,7 +20,7 @@ source( (paste0(cheminsource,"Modele/Outils/OutilsRetraite/OutilsCN.R"          
 # Declaration des variable d'outputs
 
 ageref      <- numeric(taille_max)
-pliq_       <- matrix(nrow=taille_max,ncol=8)
+pliq_       <- matrix(nrow=taille_max,ncol=7)
 gain        <- numeric(taille_max)
 actifs      <- numeric(taille_max)        # Filtre population active
 retraites   <- numeric(taille_max)        # Filtre population retraitée
@@ -32,14 +32,14 @@ liquidants_po <- numeric(taille_max)
 
 
 
-MSAL        <- matrix(nrow=7,ncol=200)    # Masse salariale par année
-MPENS       <- matrix(nrow=7,ncol=200)    # Masse des pensions année
-RATIOFIN    <- matrix(nrow=7,ncol=200)    # Ratio masse des pensions/masse des salaires par année
-SALMOY      <- matrix(nrow=7,ncol=200)    # Salaire moyen par année
-PENMOY      <- matrix(nrow=7,ncol=200)    # Pension moyenne par année
-PENREL      <- matrix(nrow=7,ncol=200)    # Ratio pension/salaire
-PENLIQMOY   <- matrix(nrow=7,ncol=200)    # Pension moyenne à liquidation
-MPENLIQ     <- matrix(nrow=7,ncol=200)    # Masse des pension à liquidation
+MSAL        <- matrix(nrow=8,ncol=200)    # Masse salariale par année
+MPENS       <- matrix(nrow=8,ncol=200)    # Masse des pensions année
+RATIOFIN    <- matrix(nrow=8,ncol=200)    # Ratio masse des pensions/masse des salaires par année
+SALMOY      <- matrix(nrow=8,ncol=200)    # Salaire moyen par année
+PENMOY      <- matrix(nrow=8,ncol=200)    # Pension moyenne par année
+PENREL      <- matrix(nrow=8,ncol=200)    # Ratio pension/salaire
+PENLIQMOY   <- matrix(nrow=8,ncol=200)    # Pension moyenne à liquidation
+MPENLIQ     <- matrix(nrow=8,ncol=200)    # Masse des pension à liquidation
 
 W           <- 2047.501
 cibletaux<-numeric(taille_max)
@@ -50,12 +50,15 @@ cot<-numeric(taille_max)
 #### Début de la simulation ####
 
 #  Rprof(tmp<-tempfile())
-for (sc in c(1,2,3,4,5,6,7)) #(sc in c(1,2,3,4,5,6,7))
-#  1: Normal   ref  2: normal CN
-#  3: Neutralisation bonif      4: Neutralisation MDA   5: Neutralisation AVPF   
-#  6: Neutralisation Periodes assimilés   7: no mc
-  
+for (sc in c(1,2,3,4,5,6,7))
 {
+#  1: Normal Ref  
+#  2: Normal CN
+#  3-5: Neutralisation Avantages familiaux (MDA, bonif, AVPF)  
+#  6: Neutralisation Periodes assimilés   
+#  7: Neutralisation mc
+  
+
   
   # Reinitialisation variables
   source( (paste0(cheminsource,"Modele/Outils/OutilsRetraite/DefVarRetr_Destinie.R")) )
@@ -70,7 +73,7 @@ for (sc in c(1,2,3,4,5,6,7)) #(sc in c(1,2,3,4,5,6,7))
   
   
   
-  TauxCotCN[]                 <- 0.27 
+  TauxCotCN[]                 <- 0.23
   plafond <- 8
   if (sc>1)        
   {
@@ -94,7 +97,7 @@ for (sc in c(1,2,3,4,5,6,7)) #(sc in c(1,2,3,4,5,6,7))
     
     if (sc>1 && t==AnneeDepartCN)
     {
-      for (i in 1:55000)
+      for (i in 1:10000)
       {
         if (ageliq[i]==0)
         {
@@ -105,7 +108,7 @@ for (sc in c(1,2,3,4,5,6,7)) #(sc in c(1,2,3,4,5,6,7))
     
     
     # Liquidations  
-    for (i in 1:55000)       # Début boucle individuelle
+    for (i in 1:10000)       # Début boucle individuelle
     {
       Leg <- t
       
@@ -137,7 +140,7 @@ for (sc in c(1,2,3,4,5,6,7)) #(sc in c(1,2,3,4,5,6,7))
       
     } # Fin de la boucle individuelle 
     
-    if (sc ==1)
+    if (sc==1)
     {
       liquidants     <- which(t_liq>=115 & t_liq <= 150)
       liquidants_rg  <- which(t_liq>=115 & t_liq <= 150 & pension_rg>0 & pension_fp==0 & pension_in==0)
@@ -169,9 +172,6 @@ for (sc in c(1,2,3,4,5,6,7)) #(sc in c(1,2,3,4,5,6,7))
 
 
 #### Sorties ####
-graph_compar(MPENLIQ2       ,110,159,"Masse des pensions à liquidations")
-#graph_compar(MPEN          ,110,159,"Ratio pension/salaire")
-
-
-
-save.image("~/Desktop/PENSIPP 0.1/Simulations/CN/Dispositifs NC/ResulatsCN.RData")
+graph_compar(MPENS[2:7,]       ,110,159,"Masse des pensions ")
+graph_compar(PENREL          ,110,159,"Ratio pension/salaire")
+save.image("~/Desktop/PENSIPP 0.1/Simulations/CN/Dispositifs NC/ANC_CN.RData")

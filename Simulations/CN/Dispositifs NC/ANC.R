@@ -1,8 +1,8 @@
-############################### EFFETS DES DISPOSITIFS NON CONTRIBUTIFS CN ###################
+############################### EFFETS DES DISPOSITIFS NON CONTRIBUTIFS ###################
 
-# Masse des pensions pour chaque dispositif CN. 
+# Masse des pensions pour chaque dispositif. 
 # Neutralisation tour à tour de chaque dispositif. 
-
+# Questions: maintien d'un âge constant? 
 
 t0  <- Sys.time()
 
@@ -17,10 +17,11 @@ source( (paste0(cheminsource,"Modele/Outils/OutilsRetraite/OutilsRetr.R"        
 source( (paste0(cheminsource,"Modele/Outils/OutilsRetraite/OutilsCN.R"           )) )
 
 
+
 # Declaration des variable d'outputs
 
 ageref      <- numeric(taille_max)
-pliq_       <- matrix(nrow=taille_max,ncol=8)
+pliq_       <- matrix(nrow=taille_max,ncol=7)
 gain        <- numeric(taille_max)
 actifs      <- numeric(taille_max)        # Filtre population active
 retraites   <- numeric(taille_max)        # Filtre population retraitée
@@ -50,10 +51,11 @@ cot<-numeric(taille_max)
 #### Début de la simulation ####
 
 #  Rprof(tmp<-tempfile())
-for (sc in c(1,2,3,4,5,6,7)) #(sc in c(1,2,3,4,5,6,7))
-#  1: Normal   ref  2: normal CN
-#  3: Neutralisation bonif      4: Neutralisation MDA   5: Neutralisation AVPF   
-#  6: Neutralisation Periodes assimilés   7: no mc
+for (sc in c(1,2,3,4,5,6,7))
+  #  1: Normal Ref  
+  #  2-4: Neutralisation Avantages familiaux (MDA, bonif, AVPF)  
+  #  5-6: Neutralisation Periodes assimilés & Pts gratuits  
+  #  7: Neutralisation Minima de pensions
   
 {
   
@@ -61,70 +63,43 @@ for (sc in c(1,2,3,4,5,6,7)) #(sc in c(1,2,3,4,5,6,7))
   source( (paste0(cheminsource,"Modele/Outils/OutilsRetraite/DefVarRetr_Destinie.R")) )
   load  ( (paste0(cheminsource,"Modele/Outils/OutilsBio/BiosDestinie2.RData"        )) )  
   setwd ( (paste0(cheminsource,"Simulations/CN"                                    )) )
-  if (sc==2) {UseOptCN(c("valocot"))}
-  if (sc==3) {UseOptCN(c("valocot","nobonifcn"))}
-  if (sc==4) {UseOptCN(c("valocot","nobonifcn","nomdacn"))}
-  if (sc==5) {UseOptCN(c("valocot","nobonifcn","nomdacn","noavpfcn"))}
-  if (sc==6) {UseOptCN(c("valocot","nobonifcn","nomdacn","noavpfcn","noassimilcn"))}
-  if (sc==7) {UseOptCN(c("valocot","nobonifcn","nomdacn","noavpfcn","noassimilcn","nomccn"))}
   
-  
-  
-  TauxCotCN[]                 <- 0.27 
-  plafond <- 8
-  if (sc>1)        
-  {
-    AnneeDepartCN <- 115
-    TauxCotCN[1:(AnneeDepartCN-1)]   <- 0  
-  }
+
+  if (sc==2) {UseOpt(c("nobonif"))}
+  if (sc==3) {UseOpt(c("nobonif","nomda"))}
+  if (sc==4) {UseOpt(c("nobonif","nomda","noavpf"))}
+  if (sc==5) {UseOpt(c("nobonif","nomda","noavpf","noassimil"))}
+  if (sc==6) {UseOpt(c("nobonif","nomda","noavpf","noassimil","noptsgratuits"))}
+  if (sc==7) {UseOpt(c("nobonif","nomda","noavpf","noassimil","noptsgratuits","nomc","nomg"))}
   
   for (t in 80:160)   # Début boucle temporelle
   {
     print (c(sc,t))
-    
-    if (sc>1)
-    {
-      if (t <110) {RendementCN[t]  <- PIB[t]/PIB[t-1]-1} 
-      else        {RendementCN[t]  <- log((MSAL[sc,t-1]*Prix[t-1])/(MSAL[sc,t-6]*Prix[t-6]))/5}
-      RendementCNPrev[t]           <- RendementCN[t]
-      RevaloCN[t+1]                <- Prix[t]/Prix[t-1]
-      UseConv(55,70,t)
-    }
-    
-    
-    if (sc>1 && t==AnneeDepartCN)
-    {
-      for (i in 1:55000)
-      {
-        if (ageliq[i]==0)
-        {
-          statut[i,statut[i,1:160]>1]<- statut[i,statut[i,1:160]>1]+100          
-        }
-      }
-    }
-    
-    
+    #    UseOpt(c("nobonif","nomda","noavpf","noassimil","noptsgratuits","nomc","nomg"))
+
+  
     # Liquidations  
-    for (i in 1:55000)       # Début boucle individuelle
+    for (i in 1:10000)       # Début boucle individuelle
     {
       Leg <- t
+      # Liquidation
       
       if ((t-t_naiss[i]>=55) && (ageliq[i]==0))
       {
-        if (sc>1 && t>=AnneeDepartCN)
+        if (sc>1)
         {        
           UseLeg(t,t_naiss[i])
           SimDir(i,t,"exo",ageref)
         }
         else
-          # Cas ou CN n'ont pas démarré, liquidation taux plein et conservation age
+          
         {
           UseLeg(t,t_naiss[i])
           SimDir(i,t,"TP")
         }
         
         if (t_liq[i]==t)
-        { 
+        {
           pliq_[i,sc] <- pension[i]
           if (sc==1) {ageref[i] <- t-t_naiss[i]}
         }
@@ -169,9 +144,8 @@ for (sc in c(1,2,3,4,5,6,7)) #(sc in c(1,2,3,4,5,6,7))
 
 
 #### Sorties ####
-graph_compar(MPENLIQ2       ,110,159,"Masse des pensions à liquidations")
-#graph_compar(MPEN          ,110,159,"Ratio pension/salaire")
+graph_compar(MPENS       ,110,159,"Masse des pensions ")
+graph_compar(PENREL      ,110,159,"Ratio pension/salaire")
 
 
-
-save.image("~/Desktop/PENSIPP 0.1/Simulations/CN/Dispositifs NC/ResulatsCN.RData")
+save.image("~/Desktop/PENSIPP 0.1/Simulations/CN/Dispositifs NC/ANC.RData")
