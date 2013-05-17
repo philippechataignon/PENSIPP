@@ -19,11 +19,15 @@
 
 
 ## Scénario simulé: 
-# A partir de 2008, date de la réforme, les bonifications pour enfants du système actuel 
+# A partir de 2013, date de la réforme, les bonifications pour enfants du système actuel 
 # sont remplacées par une bonification forfaitaire pour les parents de trois enfants 
-# ou plus. Le montant de la majoration est de 122E en 2008, puis est réevalué chaque 
-# année sur la base du taux de croissance des pensions à liquidation (scénarion 2)
+# ou plus. 
+# Le montant de la majoration est calculé à la date initiale en 2013, puis est réevalué
+# chaque année sur la base du taux de croissance des pensions à liquidation (scénarion 2)
 # ou de l'inflation (scénario 3).
+# Le niveau initial de la majoration est calculé de façon à maintenir constant le 
+# coût du dispositif, il est donc égale à la moyenne du montant de la majoration perçue
+# par les liquidants de 2013. (1662.717 euros annuels, 139e mensuels)
 # Les résultats sont comparés à une situation de statu quo (scénario 1)
 
 rm(list = ls())
@@ -46,6 +50,7 @@ ageref      <- numeric(taille_max)
 pliq_       <- matrix(nrow=taille_max,ncol=7)
 pliq_rg       <- matrix(nrow=taille_max,ncol=7)
 pliq_fp       <- matrix(nrow=taille_max,ncol=7)
+pens    <- matrix(nrow=taille_max,ncol=200)
 gain        <- numeric(taille_max)
 actifs      <- numeric(taille_max)        # Filtre population active
 retraites   <- numeric(taille_max)        # Filtre population retraitée
@@ -57,28 +62,29 @@ liquidants_rg <- numeric(taille_max)
 liquidants_in <- numeric(taille_max)
 liquidants_po <- numeric(taille_max)
 
-MSAL        <- matrix(nrow=3,ncol=200)    # Masse salariale par année
-MPENS       <- matrix(nrow=3,ncol=200)    # Masse des pensions année
-RATIOFIN    <- matrix(nrow=3,ncol=200)    # Ratio masse des pensions/masse des salaires par année
-SALMOY      <- matrix(nrow=3,ncol=200)    # Salaire moyen par année
-PENMOY      <- matrix(nrow=3,ncol=200)    # Pension moyenne par année
-PENREL      <- matrix(nrow=3,ncol=200)    # Ratio pension/salaire
-PENLIQMOY   <- matrix(nrow=3,ncol=200)    # Pension moyenne à liquidation
-PENLIQMOY  <- matrix(nrow=3,ncol=200)    # Pension moyenne à liquidation
-MPENLIQ     <- matrix(nrow=3,ncol=200)    # Masse des pension à liquidation
+MSAL        <- matrix(nrow=4,ncol=200)    # Masse salariale par année
+MPENS       <- matrix(nrow=4,ncol=200)    # Masse des pensions année
+RATIOFIN    <- matrix(nrow=4,ncol=200)    # Ratio masse des pensions/masse des salaires par année
+SALMOY      <- matrix(nrow=4,ncol=200)    # Salaire moyen par année
+PENMOY      <- matrix(nrow=4,ncol=200)    # Pension moyenne par année
+PENREL      <- matrix(nrow=4,ncol=200)    # Ratio pension/salaire
+PENLIQMOY   <- matrix(nrow=4,ncol=200)    # Pension moyenne à liquidation
+PENLIQMOY  <- matrix(nrow=4,ncol=200)    # Pension moyenne à liquidation
+MPENLIQ     <- matrix(nrow=4,ncol=200)    # Masse des pension à liquidation
 W           <- 2047.501
 
 # MAJORATION FORFAITAIRE
-flat_majo     <- matrix(nrow=3,ncol=200) 
+flat_majo     <- matrix(nrow=4,ncol=200) 
 
 
 #### Début de la simulation ####
 
 #  Rprof(tmp<-tempfile())
-for (sc in c(2,3))
+for (sc in c(1,2,3,4))
   #  1: Normal Ref  
-  #  2: Bonif forfaitaire indexé sur le taux de croissance des pensions
-  #  3: Bonif forfaitaire indexé sur l'inflation
+  #  2: No bonif
+  #  3: Bonif forfaitaire indexé sur le taux de croissance des pensions
+  #  4: Bonif forfaitaire indexé sur l'inflation
   
 {
   # Reinitialisation variables
@@ -86,18 +92,21 @@ for (sc in c(2,3))
   load  ( (paste0(cheminsource,"Modele/Outils/OutilsBio/BiosDestinie2.RData"        )) )  
   setwd ( (paste0(cheminsource,"Simulations/MDF"                                    )) )
 
-
+if (sc==2){UseOpt("nobonif")}
 
   for (t in 80:160)   # Début boucle temporelle
   {
     
     # Majoration: 
-    flat_majo[2:3,108]<-122*12 
-    if (sc==2 & t>108)
+#list <- which(t_liq==113 & n_enf[]>2)
+#mean(pliq_[list,1]-pliq_[list,2]) 
+
+    flat_majo[3:4,113]<-1662.712
+    if (sc==3 & t>113)
     {
     flat_majo[sc,t]<-flat_majo[sc,t-1]*((PENLIQMOY[sc,t-1]/PENLIQMOY[sc,t-2])) 
     }
-    if (sc==3 & t>108)
+    if (sc==4 & t>113)
     {
       flat_majo[sc,t]<-flat_majo[sc,t-1]*((Prix[t-1]/Prix[t-2])) 
     }
@@ -114,10 +123,10 @@ for (sc in c(2,3))
       
       if ((t-t_naiss[i]>=55) && (ageliq[i]==0))
       {
-        if (sc>1)
+        if (sc>2)
         {   
           # Neutralisation des bonifications pour pensions après 2008
-          if (t==108){UseOpt("nobonif")}
+          if (t==113){UseOpt("nobonif")}
           UseLeg(t,t_naiss[i])
           SimDir(i,t,"exo",ageref)
         }
@@ -137,9 +146,9 @@ for (sc in c(2,3))
           }
           
           # Application de la majoration pour les parents de 3 enfants et plus. 
-          if (sc>1) 
+          if (sc>2) 
           {
-            if (n_enf[i]>2 & t>=108)
+            if (n_enf[i]>2 & t>=113)
             {
               pension[i]<-pension[i]+flat_majo[sc,t]
             }  
@@ -187,6 +196,8 @@ for (sc in c(2,3))
       PENLIQMOY[sc,t]    <- mean (pension[which( (pension[]>0)&t_liq[]==t)])
       PENREL[sc,t]       <- PENMOY[sc,t]/SALMOY[sc,t]
     }  
+    
+    pens[,t]<-pension[]
   } # Fin de de la boucle temporelle
   
   
@@ -197,4 +208,4 @@ for (sc in c(2,3))
 
 #### Sorties ####
 
-save.image(paste0(cheminsource,"Simulations/MDF/bonif.RData"))
+save.image(paste0(cheminsource,"Simulations/MDF/bonif3.RData"))

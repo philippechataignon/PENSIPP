@@ -11,14 +11,16 @@ cheminsource <- "/Users/simonrabate/Desktop/PENSIPP 0.1/"
 load(paste0(cheminsource,"Simulations/MDF/bonif.RData"))
 load(paste0(cheminsource,"Simulations/MDF/NB.RData"))
 
-
+load(paste0(cheminsource,"Simulations/MDF/bonif3.RData"))
 pliq<- matrix(nrow=taille_max,ncol=4)
-pliq[,1]<-d[,1]       # Scénario de base
-pliq[,2]<-d[,2]       # No bonif
-pliq[,3]<-pliq_[,2]   # Scénario A
-pliq[,4]<-pliq_[,3]   # Scénario B
+pliq<-pliq_[,1:4]
+# pliq[,1]<-d[,1]       # Scénario de base
+# pliq[,2]<-d[,2]       # No bonif
+# pliq[,3]<-pliq_[,2]   # Scénario A
+# pliq[,4]<-pliq_[,3]   # Scénario B
 
-####### Nombre de liquidants par génération
+####### I. Divers #####
+# Nombre de liquidants par génération
 nbliq<-numeric(200)
 for (g in 30:90)
 {
@@ -34,7 +36,7 @@ t_death[i]<-which(statut[i,]==-3)[1]
 }
 a_death<-t_death-t_naiss
 
-######## Pourcentage de liquidants par génération: 
+#Pourcentage de liquidants par génération: 
 pliquid<-numeric(200)
 pliquidH<-numeric(200)
 pliquidF<-numeric(200)
@@ -81,7 +83,7 @@ legend("topright",legend=c("HF","H","F"),
        ncol=3,bty="n",cex=0.8,,
 )
 
-######## Quantile par generation et par sexe:   #########
+######## II. Quantile par generation et par sexe:   #########
 Q1  <-matrix(0,ncol=200,nrow=3)
 Q1H <-matrix(0,ncol=200,nrow=3)
 Q1F <-matrix(0,ncol=200,nrow=3)
@@ -95,51 +97,101 @@ Q9F <-matrix(0,ncol=200,nrow=3)
 
 # Méthode 1: moyenne des déciles
 
+# Quantiles par générations:
+for (g in 30:90)
+{
+  #  Q1: 
+  #  HF: 
+  Q1[1,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g),1],probs = seq(0, 1, 0.10))[2]
+  Q1[2,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g),2],probs = seq(0, 1, 0.10))[2]
+  Q1[3,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g),3],probs = seq(0, 1, 0.10))[2]
+  #  H: 
+  Q1H[1,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==1),1],probs = seq(0, 1, 0.10))[2]
+  Q1H[2,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==1),2],probs = seq(0, 1, 0.10))[2]
+  Q1H[3,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==1),3],probs = seq(0, 1, 0.10))[2]
+  #  F: 
+  Q1F[1,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==2),1],probs = seq(0, 1, 0.10))[2]
+  Q1F[2,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==2),2],probs = seq(0, 1, 0.10))[2]
+  Q1F[3,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==2),3],probs = seq(0, 1, 0.10))[2]
+  
+  # Q5
+  Q5[1,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g),1],probs = seq(0, 1, 0.10))[6]
+  Q5[2,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g),2],probs = seq(0, 1, 0.10))[6]
+  Q5[3,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g),3],probs = seq(0, 1, 0.10))[6]
+  #  H: 
+  Q5H[1,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==1),1],probs = seq(0, 1, 0.10))[6]
+  Q5H[2,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==1),2],probs = seq(0, 1, 0.10))[6]
+  Q5H[3,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==1),3],probs = seq(0, 1, 0.10))[6]
+  #  F: 
+  Q5F[1,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==2),1],probs = seq(0, 1, 0.10))[6]
+  Q5F[2,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==2),2],probs = seq(0, 1, 0.10))[6]
+  Q5F[3,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==2),3],probs = seq(0, 1, 0.10))[6]
+  
+  #Q9
+  Q9[1,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g),1],probs = seq(0, 1, 0.10))[10]
+  Q9[2,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g),2],probs = seq(0, 1, 0.10))[10]
+  Q9[3,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g),3],probs = seq(0, 1, 0.10))[10]
+  #  H: 
+  Q9H[1,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==1),1],probs = seq(0, 1, 0.10))[10]
+  Q9H[2,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==1),2],probs = seq(0, 1, 0.10))[10]
+  Q9H[3,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==1),3],probs = seq(0, 1, 0.10))[10]
+  #  F: 
+  Q9F[1,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==2),1],probs = seq(0, 1, 0.10))[10]
+  Q9F[2,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==2),2],probs = seq(0, 1, 0.10))[10]
+  Q9F[3,g]<-quantile(pliq[which(t_liq<999  & t_naiss==g & sexe==2),3],probs = seq(0, 1, 0.10))[10]
+}
+
+save(Q1,Q1H,Q1F,Q5,Q5H,Q5F,Q9,Q9H,Q9F, file=paste0(cheminsource,"Simulations/MDF/quant1.RData"))
+
 
 # Quantiles par générations:
 for (g in 30:90)
 {
   #  Q1: 
   #  HF: 
-  Q1[1,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g),1],probs = seq(0, 1, 0.10))[2]
-  Q1[2,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g),2],probs = seq(0, 1, 0.10))[2]
-  Q1[3,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g),3],probs = seq(0, 1, 0.10))[2]
+  Q1[1,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g),1],probs = seq(0, 1, 0.10))[2]
+  Q1[2,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g),2],probs = seq(0, 1, 0.10))[2]
+  Q1[3,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g),3],probs = seq(0, 1, 0.10))[2]
   #  H: 
-  Q1H[1,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==1),1],probs = seq(0, 1, 0.10))[2]
-  Q1H[2,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==1),2],probs = seq(0, 1, 0.10))[2]
-  Q1H[3,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==1),3],probs = seq(0, 1, 0.10))[2]
+  Q1H[1,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==1),1],probs = seq(0, 1, 0.10))[2]
+  Q1H[2,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==1),2],probs = seq(0, 1, 0.10))[2]
+  Q1H[3,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==1),3],probs = seq(0, 1, 0.10))[2]
   #  F: 
-  Q1F[1,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==2),1],probs = seq(0, 1, 0.10))[2]
-  Q1F[2,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==2),2],probs = seq(0, 1, 0.10))[2]
-  Q1F[3,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==2),3],probs = seq(0, 1, 0.10))[2]
+  Q1F[1,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==2),1],probs = seq(0, 1, 0.10))[2]
+  Q1F[2,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==2),2],probs = seq(0, 1, 0.10))[2]
+  Q1F[3,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==2),3],probs = seq(0, 1, 0.10))[2]
   
   # Q5
-  Q5[1,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g),1],probs = seq(0, 1, 0.10))[6]
-  Q5[2,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g),2],probs = seq(0, 1, 0.10))[6]
-  Q5[3,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g),3],probs = seq(0, 1, 0.10))[6]
+  Q5[1,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g),1],probs = seq(0, 1, 0.10))[6]
+  Q5[2,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g),2],probs = seq(0, 1, 0.10))[6]
+  Q5[3,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g),3],probs = seq(0, 1, 0.10))[6]
   #  H: 
-  Q5H[1,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==1),1],probs = seq(0, 1, 0.10))[6]
-  Q5H[2,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==1),2],probs = seq(0, 1, 0.10))[6]
-  Q5H[3,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==1),3],probs = seq(0, 1, 0.10))[6]
+  Q5H[1,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==1),1],probs = seq(0, 1, 0.10))[6]
+  Q5H[2,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==1),2],probs = seq(0, 1, 0.10))[6]
+  Q5H[3,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==1),3],probs = seq(0, 1, 0.10))[6]
   #  F: 
-  Q5F[1,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==2),1],probs = seq(0, 1, 0.10))[6]
-  Q5F[2,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==2),2],probs = seq(0, 1, 0.10))[6]
-  Q5F[3,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==2),3],probs = seq(0, 1, 0.10))[6]
+  Q5F[1,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==2),1],probs = seq(0, 1, 0.10))[6]
+  Q5F[2,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==2),2],probs = seq(0, 1, 0.10))[6]
+  Q5F[3,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==2),3],probs = seq(0, 1, 0.10))[6]
   
   #Q9
-  Q9[1,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g),1],probs = seq(0, 1, 0.10))[10]
-  Q9[2,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g),2],probs = seq(0, 1, 0.10))[10]
-  Q9[3,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g),3],probs = seq(0, 1, 0.10))[10]
+  Q9[1,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g),1],probs = seq(0, 1, 0.10))[10]
+  Q9[2,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g),2],probs = seq(0, 1, 0.10))[10]
+  Q9[3,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g),3],probs = seq(0, 1, 0.10))[10]
   #  H: 
-  Q9H[1,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==1),1],probs = seq(0, 1, 0.10))[10]
-  Q9H[2,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==1),2],probs = seq(0, 1, 0.10))[10]
-  Q9H[3,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==1),3],probs = seq(0, 1, 0.10))[10]
+  Q9H[1,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==1),1],probs = seq(0, 1, 0.10))[10]
+  Q9H[2,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==1),2],probs = seq(0, 1, 0.10))[10]
+  Q9H[3,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==1),3],probs = seq(0, 1, 0.10))[10]
   #  F: 
-  Q9F[1,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==2),1],probs = seq(0, 1, 0.10))[10]
-  Q9F[2,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==2),2],probs = seq(0, 1, 0.10))[10]
-  Q9F[3,g]<-quantile(pliq[which(t_liq<999 & t_naiss==g & sexe==2),3],probs = seq(0, 1, 0.10))[10]
+  Q9F[1,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==2),1],probs = seq(0, 1, 0.10))[10]
+  Q9F[2,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==2),2],probs = seq(0, 1, 0.10))[10]
+  Q9F[3,g]<-quantile(pliq[which(t_liq<999 & n_enf>2 & t_naiss==g & sexe==2),3],probs = seq(0, 1, 0.10))[10]
 }
 
+save(Q1,Q1H,Q1F,Q5,Q5H,Q5F,Q9,Q9H,Q9F, file=paste0(cheminsource,"Simulations/MDF/quant1enf.RData"))
+
+
+###### Moyenne par génération:  ######
 
 #Moyenne 5 générations: 
 Q1M <-matrix(0,ncol=12,nrow=3)
@@ -190,7 +242,7 @@ for (k in 1:12)
 
 # Femmes: 
 
-plot(Q1MF[3,3:12],type="l",lwd=2,
+plot(Q1MF[3,1:12],type="l",lwd=2,
      ylim=c(0,10000),col="grey0",xaxt="n",
      xlab="Année de naissance",ylab="")
 points (Q1MF[3,3:12],col="grey0", pch=16)
@@ -307,26 +359,26 @@ legend("topright",legend=c("Réforme","No bonif","Législation actuelle"),
 
 
 # Q1: 
-plot(Q1MF[3,3:12],type="l",lwd=2,
+plot(Q1MF[3,1:8],type="l",lwd=2,
      ylim=c(2000,14000),col="grey0",xaxt="n",
      xlab="Année de naissance",ylab="")
-points (Q1MF[3,3:12],col="grey0", pch=16)
-lines(Q1MF[2,3:12],col="grey40",type="l",lwd=2)
-points (Q1MF[2,3:12],col="grey40", pch=16)
-lines(Q1MF[1,3:12],col="grey80",type="l",lwd=2)
-points (Q1MF[1,3:12],col="grey80", pch=16)
+points (Q1MF[3,1:8],col="grey0", pch=16)
+lines(Q1MF[2,1:8],col="grey40",type="l",lwd=2)
+points (Q1MF[2,1:8],col="grey40", pch=16)
+lines(Q1MF[1,1:8],col="grey80",type="l",lwd=2)
+points (Q1MF[1,1:8],col="grey80", pch=16)
 
-lines(Q1MH[3,3:12],col="grey0",type="l",lwd=2)
-points (Q1MH[3,3:12],col="grey0", pch=17)
-lines(Q1MH[2,3:12],col="grey40",type="l",lwd=2)
-points (Q1MH[2,3:12],col="grey40", pch=17)
-lines(Q1MH[1,3:12],col="grey80",type="l",lwd=2)
-points (Q1MH[1,3:12],col="grey80", pch=17)
+lines(Q1MH[3,1:8],col="grey0",type="l",lwd=2)
+points (Q1MH[3,1:8],col="grey0", pch=17)
+lines(Q1MH[2,1:8],col="grey40",type="l",lwd=2)
+points (Q1MH[2,1:8],col="grey40", pch=17)
+lines(Q1MH[1,1:8],col="grey80",type="l",lwd=2)
+points (Q1MH[1,1:8],col="grey80", pch=17)
 
 
-lab<-c("1940-1944","1945-1949","1950-1954","1955-1959","1960-1964","1965-1969","1970-1974","1975-1979","1980-1984","1985-1989")
-axis(1,at=1:10, label=FALSE)
-text(seq(1, 10, by=1), par("usr")[3] - 0.2, labels = lab, srt = 45,offset=1.3, pos = 1, xpd = TRUE,cex=0.8)
+lab<-c("1930-1934","1935-1939","1940-1944","1945-1949","1950-1954","1955-1959","1960-1964","1965-1969")
+axis(1,at=1:8, label=FALSE)
+text(seq(1, 8, by=1), par("usr")[3] - 0.2, labels = lab, srt = 45,offset=1.3, pos = 1, xpd = TRUE,cex=0.8)
 legend("topright",legend=c("Réforme","No bonif","Législation actuelle"),
        lty=1,lwd=2,pch=21,col=c("grey0","grey40","grey80"),
        ncol=3,bty="n",cex=0.8
