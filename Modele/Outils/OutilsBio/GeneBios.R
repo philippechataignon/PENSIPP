@@ -8,7 +8,7 @@ source( (paste0(cheminsource,"Modele/Outils/OutilsRetraite/OutilsMS.R"          
 source( (paste0(cheminsource,"Modele/Outils/OutilsRetraite/OutilsPensIPP.R"      )) )
 source( (paste0(cheminsource,"Modele/Outils/OutilsRetraite/DefVarRetr_Destinie.R")) )
 
-setwd ( (paste0(cheminsource,"Modèle/Paramètres/Destinie/Importation des bios"   )) )
+setwd ( (paste0(cheminsource,"Modele/Parametres/Destinie/Importation des bios"   )) )
 
 
 # Lecture donnÃ©es d'Ã©tat initial (NB : le tableau intermÃ©diaire buf est lu sous forme de dataframe 
